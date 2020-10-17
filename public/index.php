@@ -11,4 +11,4 @@ require (__ROOT . "/web.php");
 
 $url = isset($_GET['url']) ? $_GET['url'] : "/";
 
-Route::route("/".$url);
+Route::route($url);
