@@ -15,30 +15,22 @@ class FestivalApp {
 
     async init(){
         this.xml = await this.readFestivals();
-        this.datas = this.generateDatas();
+        this.generateDatas();
         this.render();
         this.addEvent();
     }
 
-    readFestivals(){
-        return $.ajax('/xml/festivalList.xml');
+    generateDatas(){
+        this.datas = JSON.parse(this.xml).festivals;   
     }
 
-    generateDatas(){
-
-        return Array.from(this.xml.querySelectorAll("item")).map( item => {    
-
-            let sn = item.querySelector("sn").innerHTML;
-            let no = item.querySelector("no").innerHTML;
-            let nm = item.querySelector("nm").innerHTML;
-            let area = item.querySelector("area").innerHTML;
-            let location = item.querySelector("location").innerHTML;
-            let dt = item.querySelector("dt").innerHTML;
-            let cn = item.querySelector("cn").innerHTML;
-            let imgs = Array.from(item.querySelectorAll("images > image")).map(x => x.innerHTML);
-            let imagePath = `/xml/festivalImages/${sn.padStart(3, '0')}_${no}`;
-            
-            return { sn, no, nm, area, location, dt, cn , imgs, imagePath };
+    readFestivals(){
+        return new Promise(( res,rej )=>{
+            $.ajax({
+                method : "POST",
+                url : "/api/get/festival",
+                success : e => { res(e) }  
+            }); 
         });
     }
 
@@ -57,7 +49,7 @@ class FestivalApp {
         let type = qsObj.searchType;
         type = ["album","list"].includes(type) ? type : "album";
         
-        const PAGE_CNT = type == "album" ? 6 : 10;
+        const PAGE_CNT = 11;
         const PAGE_SCNT = 5;
         let totalPage = Math.ceil(this.datas.length / PAGE_CNT);
         let currentChapter = Math.ceil(page / PAGE_SCNT);
@@ -80,53 +72,16 @@ class FestivalApp {
                 <a class="page_item page_${ next ? "active" : "normal" }" href="?searchType=${type}&page=${ next ? currentChapter * PAGE_CNT : totalPage  }"><i class="fa fa-angle-right"></i></a>`;
         this.$paging.html(html);
         
-        if(type === "album") this.drawAlbum(arr);
-        else this.drawList(arr);
+        this.drawAlbum(arr);
         log(arr);
     }
 
-    async drawAlbum(arr){
-        
-        let last_item = this.datas[this.datas.length-1];
-        let src = last_item.imagePath + "/" + last_item.imgs[0];
-        let img = await this.loadImage(src);
-        src = img.src;
+    drawAlbum(arr){
 
-        let html = `<div class="row" id="last_festival" data-sn="${last_item.sn}">
-                        <div class="col-4" data-sn="${last_item.sn}">
-                            <img src="${src}" alt="img" title="img" id="last_item_img">
-                        </div> 
-                        <div class="col-8">
-                            <div class="row">
-                                <h3 id="last_item_title" class="bold">${last_item.nm}</h3>
-                                <p class="fosi-1 color-333030" id="last_item_info">
-                                    ${last_item.cn}
-                                </p>
-                                <button class="btn btn-primary" id="last_item_modal">자세히 보기</button>
-                            </div>
-                        </div>
-                    </div>`;
-        //
+        arr.map( festival => {
 
-        let inner = arr.map( festival =>{
-            return `
-                <div class="col-4 festival_item border" data-sn="${ festival.sn }">
-                    <img src="${ festival.imagePath  + "/" + festival.imgs[0] }" alt="img" title="img" class="img-parent-width">
-                    <h4 class="mt-2">${ festival.nm }</h4>
-                    <p class="color-333030">${ festival.dt }</p>
-                    <div class="album_img_cnt">${ festival.imgs.length }</div>
-            </div>
-            `;
-        });
-
-        html += `<div class="row mt-4 mb-4">
-            ${inner.join('')}
-        </div>`;
-
-        this.$content.html(html);
-        this.$content.find("img").on("error",(e)=>{
-            $(e.target).attr("src", 'imgs/img_no.png');
-            $(e.target).parent().find(".album_img_cnt").remove();
+            
+            
         });
         
         this.$content.find("#last_festival").on("click", this.itemClickEventHandler);
@@ -196,7 +151,7 @@ class FestivalApp {
             </div>
 
             <div class="col-6">
-                <h4>${festival.nm}</h4>
+                <h4>${festival.name}</h4>
                 <p>지역 : ${festival.area}</p>
                 <p>장소 : ${festival.location}</p>
                 <p>기간 : ${festival.dt}</p>

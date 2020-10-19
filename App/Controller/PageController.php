@@ -1,6 +1,8 @@
 <?php 
 
 namespace Gondr\Controller;
+use Gondr\DB;
+
 
 class PageController extends MasterController {
 
@@ -16,7 +18,19 @@ class PageController extends MasterController {
 
 	public function rep_festival()
 	{
-		$this->render("festival");
+
+		$festivals = DB::fetchAll("SELECT * FROM `festival`", []);
+		$festivals = array_map( function($festival){
+
+			$imgs = DB::fetchAll("SELECT * FROM `festival_imgs` WHERE `festival_id` = ?" , [ $festival->id ] );
+			$festival->imgs = array_map(function($img){
+				return $img->name;
+			},$imgs);
+			return $festival;
+
+		} , $festivals );
+
+		$this->render("festival" , ["festivals"=>$festivals]);
 	}
 
 	public function notice()

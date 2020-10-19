@@ -40,8 +40,12 @@
                     <i class="fa fa-chevron-down color-666" style="font-size: 12px;"></i>
                     <div class="util-nav ml-2">
                         <a href="#" class="ml-2 color-666-hover">전라북도청</a>
+                        <?php if(__SIGN) : ?>
+                            <a href="/user_logout" class="ml-2 color-666-hover">로그아웃</a>
+                        <?php else : ?>
                         <a href="/user_login" class="ml-2 color-666-hover">로그인</a>
                         <a href="/user_join" class="ml-2 color-666-hover">회원가입</a>
+                        <?php endif; ?>
                     </div>
                 </div>
 

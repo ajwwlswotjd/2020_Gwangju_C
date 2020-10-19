@@ -4,10 +4,11 @@
                 <h1>JEONBUK <span class="bold">FESTIVAL</span></h1>
                 <p>전북 대표 축제</p>
             </div>
+            <?php if(__SIGN) : ?>
             <div class="col-6 d-flex justify-content-end align-items-center">
-                <a href="?searchType=album" class="btn btn-outline-primary mr-1" data-type="album">앨범형</a>
-                <a href="?searchType=list" class="btn btn-outline-primary" data-type="list">목록형</a>
+                <a href="/festival" class="btn btn-primary mr-1">축제 등록</a>
             </div>
+            <?php endif; ?>
         </div>
 
         <div id="content">
@@ -15,21 +16,35 @@
                 <thead class="thead-dark">
                     <tr>
                         <th>번호</th>
-                        <th>축제명</th>
+                        <th>축제명(사진)</th>
+                        <th colspan="2">다운로드</th>
                         <th>기간</th>
                         <th>장소</th>
                     </tr>
                 </thead>
                 <tbody id="list-tbody">
-                    
+                    <?php foreach($festivals as $festival) : ?>
+                        <tr>
+                            <?php if(__SIGN) : ?>
+                            <td><a href="/festival"><?= $festival->id ?></a></td>
+                            <?php else : ?>
+                            <td><?= $festival->id ?></td>
+                            <?php endif; ?>
+                            <td><?= htmlentities($festival->name) ?></td>
+                            <td><a class="btn btn-primary" href="/download?type=tar&id=<?= $festival->id ?>">tar</a></td>
+                            <td><a class="btn btn-primary" href="/download?type=zip&id=<?= $festival->id ?>">zip</a></td>
+                            <td><?= htmlentities($festival->start_date) ."~". htmlentities($festival->end_date) ?></td>
+                            <td><?= htmlentities($festival->area) ?></td>
+                        </tr>
+                    <?php endforeach; ?>
                 </tbody>
             </table>
         </div>
 
         <div id="paging" class="flex-center-row mt-2">
-            <a href="#" class="page_item page_active"><i class="fa fa-angle-left"></i></a>
-            <a href="#" class="page_item page_active">1</a>
-            <a href="#" class="page_item page_active"><i class="fa fa-angle-right"></i></a>
+            <a href="/festival" class="page_item page_active"><i class="fa fa-angle-left"></i></a>
+            <a href="/festival" class="page_item page_active">1</a>
+            <a href="/festival" class="page_item page_active"><i class="fa fa-angle-right"></i></a>
         </div>
 
         <div id="modal">

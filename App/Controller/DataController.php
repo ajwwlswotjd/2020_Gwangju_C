@@ -2,6 +2,8 @@
 
 namespace Gondr\Controller;
 use Gondr\DB;
+use Gondr\Lib;
+use ZipArchive;
 
 class DataController extends MasterController {
 
@@ -23,11 +25,12 @@ class DataController extends MasterController {
         {
 
             
-            $sql = "INSERT INTO `festival`(`id`, `no`, `name`, `location`, `start_date`, `end_date`, `content`, `imagePath`) VALUES (?,?,?,?,?,?,?,?)";
+            $sql = "INSERT INTO `festival`(`id`, `no`, `name`, `location`, `start_date`, `end_date`, `content`, `imagePath` , `area`) VALUES (?,?,?,?,?,?,?,?,?)";
             $id = $item->sn;
             $no = $item->no;
             $name = $item->nm;
             $location = $item->location;
+            $area = $item->area;
             
             $date = $item->dt;
             $date = str_replace(".","-",$date);
@@ -51,7 +54,7 @@ class DataController extends MasterController {
             $imagePath = $default_path . "\\" . str_pad( $item->sn , 3 , "0" , STR_PAD_LEFT ) . "_" . $item->no;
             
             
-            DB::query( $sql, [ $id, $no, $name, $location, $start_date, $end_date, $content, $imagePath ] );
+            DB::query( $sql, [ $id, $no, $name, $location, $start_date, $end_date, $content, $imagePath, $area ] );
             
 
             $flag = null;
@@ -73,6 +76,48 @@ class DataController extends MasterController {
         // var_dump($data);
         echo "</pre>";
 
+
+    }
+
+    public function download()
+    {
+        $type = $_GET['type'];
+        $id = $_GET['id'];
+
+        $festival = DB::fetch("SELECT * FROM `festival` WHERE `id` = ?", [ $id ]);
+        if(!$festival)
+        {
+            Lib::back("에반데 ㅋㅋ;");
+            exit;
+        }
+        $imagePath = $festival->imagePath;
+        $imgs = DB::fetchAll("SELECT * FROM `festival_imgs` WHERE `festival_id` = ?" , [ $id ]);
+        $imgs = array_map(function($img){ return $img->name; } , $imgs );
+        if(count($imgs) === 0)
+        {
+            Lib::back("첨부파일이 존재하지 않습니다.");
+            exit;
+        }
+
+        $filePath = __ROOT.$festival->imagePath."/". time() . ".$type";
+        echo $filePath;
+        
+        if($type==="zip")
+        {
+
+            // $zip = new ZipArchive();
+            // $zip->open()
+
+        }
+        else if($type === "tar")
+        {
+
+        }
+        else
+        {
+            Lib::back("타입이 잘못됬잖아 !!");
+            exit;
+        }
 
     }
 
